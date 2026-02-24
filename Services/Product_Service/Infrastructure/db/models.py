@@ -1,10 +1,10 @@
-from enum import Enum
+from enum import StrEnum
 from sqlalchemy import Column, Integer, String, Float, Boolean, Text, Enum as SQLEnum
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-class ProductCategory(str, Enum):
+class ProductCategory(StrEnum):
     MOUNT = "mount"
     PET = "pet"
     SUBSCRIPTION = "subscription"

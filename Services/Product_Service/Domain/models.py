@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 from pydantic import BaseModel, Field
 
-class ProductCategory(str, Enum):
+class ProductCategory(StrEnum):
     MOUNT = "mount"
     PET = "pet"
     SUBSCRIPTION = "subscription"
@@ -10,8 +10,8 @@ class ProductCategory(str, Enum):
     COSMETIC = "cosmetic"
 
 class Product(BaseModel):
-    id: int = Field(..., description="Identifiant unique du produit")
-    name: str = Field(..., min_length=1, max_length=100, description="Nom de l'objet (ex: Rênes d'Invincible)")
+    id: int = Field(description="Identifiant unique du produit")
+    name: str = Field(min_length=1, max_length=100, description="Nom de l'objet (ex: Rênes d'Invincible)")
     description: Optional[str] = Field(None, description="Description ou Lore de l'objet")
     # price: float = Field(..., gt=0, description="Prix en euros ou pièces d'or")
     category: ProductCategory = Field(..., description="Catégorie de l'objet")
