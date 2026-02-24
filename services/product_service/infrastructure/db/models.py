@@ -1,15 +1,9 @@
+from sqlalchemy import Column, Integer, String, Boolean, Text, Enum as SQLEnum
 from enum import StrEnum
-from sqlalchemy import Column, Integer, String, Float, Boolean, Text, Enum as SQLEnum
 from sqlalchemy.orm import declarative_base
+from domain.models import ProductCategory
 
 Base = declarative_base()
-
-class ProductCategory(StrEnum):
-    MOUNT = "mount"
-    PET = "pet"
-    SUBSCRIPTION = "subscription"
-    SERVICE = "service"
-    COSMETIC = "cosmetic"
 
 class User(Base):
     __tablename__ = "users"
@@ -21,13 +15,11 @@ class User(Base):
     profile_picture_url = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
 
-class Product(Base):
+class ProductShema(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), index=True, nullable=False)
     description = Column(Text, nullable=True)
-    price = Column(Float, nullable=False)
     category = Column(SQLEnum(ProductCategory), nullable=False)
-    stock = Column(Integer, default=0)
     image_url = Column(String(255), nullable=True)
