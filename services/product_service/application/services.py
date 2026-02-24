@@ -22,5 +22,3 @@ class ProductService:
         # C'est ici qu'on ajouterait de la logique métier supplémentaire si besoin
         # (ex: vérifier si l'utilisateur a le droit de créer, envoyer une notif, etc.)
         return self.repository.create_product(product)
-    
-    

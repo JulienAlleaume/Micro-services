@@ -23,4 +23,3 @@ class ProductShema(Base):
     description = Column(Text, nullable=True)
     category = Column(SQLEnum(ProductCategory), nullable=False)
     image_url = Column(String(255), nullable=True)
-    
