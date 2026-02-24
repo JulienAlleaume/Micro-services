@@ -26,3 +26,4 @@ class ProductUpdateRequest(BaseModel):
     category: str
     image_url: Optional[str] = None
     
+    

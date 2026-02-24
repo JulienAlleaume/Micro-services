@@ -30,3 +30,4 @@ class Product(BaseModel):
                 "image_url": "item_image.jpg"
             }
         }
+        
