@@ -23,3 +23,4 @@ class ProductService:
         # (ex: vérifier si l'utilisateur a le droit de créer, envoyer une notif, etc.)
         return self.repository.create_product(product)
     
+    
