@@ -25,3 +25,4 @@ class ProductUpdateRequest(BaseModel):
     description: Optional[str] = None
     category: str
     image_url: Optional[str] = None
+    
