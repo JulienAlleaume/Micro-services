@@ -5,6 +5,8 @@ import httpx
 
 from application.service.pricing import PricingGatewayService
 from application.service.inventory import InventoryGatewayService
+from application.service.customer import CustomerGatewayService
+from application.service.order import OrderGatewayService
 
 router = APIRouter()
 
@@ -45,7 +47,7 @@ async def _proxy_request(request: Request, target_base_url: str) -> StreamingRes
 
 
 # ──────────────────────────────────────────────
-#  Routes Pricing (via RabbitMQ RPC)
+#  Routes Pricing (via ZMQ RPC)
 #  Définies AVANT le catch-all pour avoir priorité
 # ──────────────────────────────────────────────
 
@@ -129,6 +131,94 @@ def update_inventory(warehouse_id: int, product_id: int, request_body: dict):
     try:
         service = InventoryGatewayService()
         return service.update_quantity(warehouse_id, product_id, request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ──────────────────────────────────────────────
+#  Routes Customer (via ZMQ RPC)
+# ──────────────────────────────────────────────
+
+@router.get("/customers/")
+def get_all_customers():
+    """Liste tous les clients."""
+    try:
+        service = CustomerGatewayService()
+        return service.get_all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/customers/{customer_id}")
+def get_customer(customer_id: int):
+    """Recupere un client par son ID."""
+    try:
+        service = CustomerGatewayService()
+        return service.get_by_id(customer_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/customers/", status_code=201)
+def create_customer(request_body: dict):
+    """Cree un nouveau client."""
+    try:
+        service = CustomerGatewayService()
+        return service.create(request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/customers/{customer_id}")
+def update_customer(customer_id: int, request_body: dict):
+    """Met a jour un client existant."""
+    try:
+        service = CustomerGatewayService()
+        return service.update(customer_id, request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ──────────────────────────────────────────────
+#  Routes Order (via ZMQ RPC)
+# ──────────────────────────────────────────────
+
+@router.get("/orders/")
+def get_all_orders():
+    """Liste toutes les commandes."""
+    try:
+        service = OrderGatewayService()
+        return service.get_all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/orders/{order_id}")
+def get_order(order_id: int):
+    """Recupere une commande par son ID."""
+    try:
+        service = OrderGatewayService()
+        return service.get_by_id(order_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/orders/", status_code=201)
+def create_order(request_body: dict):
+    """Cree une nouvelle commande."""
+    try:
+        service = OrderGatewayService()
+        return service.create(request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch("/orders/{order_id}")
+def update_order_status(order_id: int, request_body: dict):
+    """Met a jour le statut d'une commande."""
+    try:
+        service = OrderGatewayService()
+        return service.update_status(order_id, request_body)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

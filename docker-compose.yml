@@ -11,6 +11,11 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
 
   product_service:
     build: ./services/product_service
@@ -24,8 +29,10 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
       - ZMQ_PUB_PORT=5555
+      - PYTHONUNBUFFERED=1
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   pricing_service:
     build: ./services/pricing_service
@@ -39,10 +46,12 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
       - PRODUCT_ZMQ_URL=tcp://product_service:5555
       - PRICING_REP_PORT=5556
-      - PRODUCT_SERVICE_URL=http://product_service:8001
+      - PYTHONUNBUFFERED=1
     depends_on:
-      - postgres
-      - product_service
+      postgres:
+        condition: service_healthy
+      product_service:
+        condition: service_started
 
   inventory_service:
     build: ./services/inventory_service
@@ -56,10 +65,47 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
       - PRODUCT_ZMQ_URL=tcp://product_service:5555
       - INVENTORY_REP_PORT=5557
-      - PRODUCT_SERVICE_URL=http://product_service:8001
+      - ORDERLINE_ZMQ_URL=tcp://order_service:5560
+      - PYTHONUNBUFFERED=1
     depends_on:
-      - postgres
-      - product_service
+      postgres:
+        condition: service_healthy
+      product_service:
+        condition: service_started
+
+  order_service:
+    build: ./services/order_service
+    container_name: order_service
+    command: uv run python main.py
+    volumes:
+      - ./services/order_service:/app
+    ports:
+      - "5558:5558"  # ZMQ REP
+      - "5560:5560"  # ZMQ PUB — orderline events
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
+      - ORDER_REP_PORT=5558
+      - ORDER_PUB_PORT=5560
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  customer_service:
+    build: ./services/customer_service
+    container_name: customer_service
+    command: uv run python main.py
+    volumes:
+      - ./services/customer_service:/app
+    ports:
+      - "5559:5559"  # ZMQ REP
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
+      - CUSTOMER_REP_PORT=5559
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   gateway_service:
     build: ./services/gateway_service
@@ -73,10 +119,20 @@ services:
       - PRODUCT_SERVICE_URL=http://product_service:8001
       - PRICING_ZMQ_URL=tcp://pricing_service:5556
       - INVENTORY_ZMQ_URL=tcp://inventory_service:5557
+      - ORDER_ZMQ_URL=tcp://order_service:5558
+      - CUSTOMER_ZMQ_URL=tcp://customer_service:5559
+      - PYTHONUNBUFFERED=1
     depends_on:
-      - product_service
-      - pricing_service
-      - inventory_service
+      product_service:
+        condition: service_started
+      pricing_service:
+        condition: service_started
+      inventory_service:
+        condition: service_started
+      order_service:
+        condition: service_started
+      customer_service:
+        condition: service_started
 
 volumes:
   postgres_data:

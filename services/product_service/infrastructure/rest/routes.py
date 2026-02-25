@@ -11,7 +11,7 @@ from domain.entities import Product, ProductCategory
 
 router = APIRouter()
 
-# --- Singleton publisher RabbitMQ (lazy init) ---
+# --- Singleton publisher ZMQ (lazy init) ---
 _publisher = None
 
 
@@ -21,7 +21,7 @@ def _get_publisher():
         try:
             _publisher = ProductEventPublisher()
         except Exception as e:
-            print(f"⚠️ Could not connect to RabbitMQ: {e}")
+            print(f"Could not init ZMQ publisher: {e}")
     return _publisher
 
 

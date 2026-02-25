@@ -8,8 +8,7 @@ from infrastructure.db.repository import InventoryRepository
 from application.services.crud_services import InventoryService
 
 # URL du socket PUB du order_service (evenement orderline.created)
-# Ce subscriber sera actif quand order_service sera implemente.
-ORDERLINE_ZMQ_URL = os.getenv("ORDERLINE_ZMQ_URL", "tcp://order_service:5558")
+ORDERLINE_ZMQ_URL = os.getenv("ORDERLINE_ZMQ_URL", "tcp://order_service:5560")
 
 
 def _handle_event(event: dict):

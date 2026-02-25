@@ -31,13 +31,13 @@ curl -s "$BASE_URL/products/" | python3 -m json.tool && ok "Liste récupérée"
 title "4. Produit par ID (GET /products/1)"
 curl -s "$BASE_URL/products/1" | python3 -m json.tool && ok "Produit récupéré"
 
-title "5. Catégorie invalide — doit retourner 422 (POST /products/)"
+title "5. Catégorie invalide — doit retourner 400 (POST /products/)"
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/products/" \
   -H 'Content-Type: application/json' \
   -d '{"name":"Objet","category":"invalid_category"}')
 echo "HTTP status: $STATUS"
-[ "$STATUS" == "422" ] && ok "Erreur 422 correctement retournée" \
-  || echo -e "${RED}[KO]${RESET} Attendu 422, reçu $STATUS"
+[ "$STATUS" == "400" ] && ok "Erreur 400 correctement retournée" \
+  || echo -e "${RED}[KO]${RESET} Attendu 400, reçu $STATUS"
 
 # ── PRICES ───────────────────────────────────────────────
 
@@ -69,6 +69,40 @@ curl -s -X PATCH "$BASE_URL/inventory/1/1" \
 
 title "12. Vérification du nouveau stock (GET /inventory/1)"
 curl -s "$BASE_URL/inventory/1" | python3 -m json.tool
+
+# ── CUSTOMERS ────────────────────────────────────────────
+
+title "13. Création d'un client (POST /customers/)"
+curl -s -X POST "$BASE_URL/customers/" \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"arthas","email":"arthas@northrend.wow","gold_balance":10000}' \
+  | python3 -m json.tool && ok "Client créé"
+
+title "14. Liste de tous les clients (GET /customers/)"
+curl -s "$BASE_URL/customers/" | python3 -m json.tool && ok "Clients récupérés"
+
+title "15. Client par ID (GET /customers/1)"
+curl -s "$BASE_URL/customers/1" | python3 -m json.tool && ok "Client récupéré"
+
+# ── ORDERS ───────────────────────────────────────────────
+
+title "16. Création d'une commande (POST /orders/)"
+curl -s -X POST "$BASE_URL/orders/" \
+  -H 'Content-Type: application/json' \
+  -d '{"customer_id":1,"lines":[{"product_id":1,"product_name":"Rênes Invincible","quantity":1,"unit_price":999}]}' \
+  | python3 -m json.tool && ok "Commande créée"
+
+title "17. Liste de toutes les commandes (GET /orders/)"
+curl -s "$BASE_URL/orders/" | python3 -m json.tool && ok "Commandes récupérées"
+
+title "18. Commande par ID (GET /orders/1)"
+curl -s "$BASE_URL/orders/1" | python3 -m json.tool && ok "Commande récupérée"
+
+title "19. Mise à jour du statut (PATCH /orders/1)"
+curl -s -X PATCH "$BASE_URL/orders/1" \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"confirmed"}' \
+  | python3 -m json.tool && ok "Statut mis à jour"
 
 sep
 echo -e "\n${GREEN}Tests terminés.${RESET}\n"

@@ -3,7 +3,7 @@ from infrastructure.messaging.req_pricing import PricingRpcClient
 class PricingGatewayService:
     """
     Service applicatif de la Gateway pour le Pricing Service.
-    Communique via RabbitMQ RPC (pas HTTP).
+    Communique via ZMQ REQ/REP.
     """
 
     def get_all_prices(self) -> list[dict]:
