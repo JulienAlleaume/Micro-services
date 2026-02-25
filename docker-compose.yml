@@ -1,18 +1,5 @@
 services:
 
-  rabbitmq:
-    image: rabbitmq:3.12-management-alpine
-    container_name: 'rabbitmq_api_client'
-    volumes:
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-user}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-password}
-      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
-    ports:
-      - 5672:5672
-      - 15672:15672
-
   postgres:
     image: postgres:15-alpine
     container_name: 'postgres_db'
@@ -33,11 +20,29 @@ services:
       - ./services/product_service:/app
     ports:
       - "8001:8001"
+      - "5555:5555"  # ZMQ PUB — accessible par les subscribers
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
+      - ZMQ_PUB_PORT=5555
     depends_on:
       - postgres
-      - rabbitmq
+
+  pricing_service:
+    build: ./services/pricing_service
+    container_name: pricing_service
+    command: python main.py
+    volumes:
+      - ./services/pricing_service:/app
+    ports:
+      - "5556:5556"  # ZMQ REP — accessible par le client REQ de la gateway
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
+      - PRODUCT_ZMQ_URL=tcp://product_service:5555
+      - PRICING_REP_PORT=5556
+      - PRODUCT_SERVICE_URL=http://product_service:8001
+    depends_on:
+      - postgres
+      - product_service
 
   gateway_service:
     build: ./services/gateway_service
@@ -49,8 +54,10 @@ services:
       - "8000:8000"
     environment:
       - PRODUCT_SERVICE_URL=http://product_service:8001
+      - PRICING_ZMQ_URL=tcp://pricing_service:5556
     depends_on:
       - product_service
+      - pricing_service
 
 volumes:
   postgres_data:

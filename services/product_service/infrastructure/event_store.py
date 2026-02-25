@@ -21,4 +21,4 @@ class EventStore:
         
         self.session.add(event_db)
         self.session.commit()
-        print(f"💾 Event saved to DB: {event_db.event_type} for ID {event_db.aggregate_id}")
+        print(f"Event saved to DB: {event_db.event_type} for ID {event_db.aggregate_id}")

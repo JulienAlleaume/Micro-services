@@ -58,16 +58,16 @@ def post_product(data):
         
         with urllib.request.urlopen(req) as response:
             if response.status in (200, 201):
-                print(f"✅ [OK] {data['name']}")
+                print(f"[OK] {data['name']}")
             else:
-                print(f"⚠️ [STATUS {response.status}] {data['name']}")
+                print(f"[STATUS {response.status}] {data['name']}")
                 
     except urllib.error.HTTPError as e:
         # Affiche le détail de l'erreur (utile si la catégorie est invalide par exemple)
         error_content = e.read().decode()
-        print(f"❌ [ERREUR] {data['name']} : {e.code} - {error_content}")
+        print(f"[ERREUR] {data['name']} : {e.code} - {error_content}")
     except Exception as e:
-        print(f"❌ [EXCEPTION] {e}")
+        print(f"[EXCEPTION] {e}")
 
 def main():
     print(f"--- Démarrage de l'import depuis {STATIC_DIR} ---")

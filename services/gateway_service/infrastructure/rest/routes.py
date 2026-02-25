@@ -1,7 +1,9 @@
 import os
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import StreamingResponse
 import httpx
+
+from application.service.pricing import PricingGatewayService
 
 router = APIRouter()
 
@@ -41,7 +43,64 @@ async def _proxy_request(request: Request, target_base_url: str) -> StreamingRes
         )
 
 
-# --- Routes de la Gateway ---
+# ──────────────────────────────────────────────
+#  Routes Pricing (via RabbitMQ RPC)
+#  Définies AVANT le catch-all pour avoir priorité
+# ──────────────────────────────────────────────
+
+@router.get("/prices/")
+def get_all_prices():
+    """Liste tous les prix."""
+    try:
+        service = PricingGatewayService()
+        return service.get_all_prices()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/prices/product/{product_id}")
+def get_price_by_product(product_id: int):
+    """Récupère le prix associé à un produit."""
+    try:
+        service = PricingGatewayService()
+        return service.get_price_by_product(product_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/prices/{price_id}")
+def get_price(price_id: int):
+    """Récupère un prix par son ID."""
+    try:
+        service = PricingGatewayService()
+        return service.get_price(price_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/prices/", status_code=201)
+def create_price(request_body: dict):
+    """Crée un nouveau prix."""
+    try:
+        service = PricingGatewayService()
+        return service.create_price(request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/prices/{price_id}")
+def update_price(price_id: int, request_body: dict):
+    """Met à jour un prix existant."""
+    try:
+        service = PricingGatewayService()
+        return service.update_price(price_id, request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ──────────────────────────────────────────────
+#  Route catch-all — proxy HTTP vers les autres services
+# ──────────────────────────────────────────────
 
 @router.api_route(
     "/{path:path}",
@@ -49,7 +108,7 @@ async def _proxy_request(request: Request, target_base_url: str) -> StreamingRes
 )
 async def gateway_entrypoint(path: str, request: Request):
     """
-    Point d'entrée unique de la Gateway.
+    Point d'entrée de la Gateway.
     Redirige chaque requête vers le microservice approprié selon le préfixe du path.
     """
     if path.startswith("products") or path.startswith("static"):
