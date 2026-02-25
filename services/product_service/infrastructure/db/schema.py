@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, Enum as
 from datetime import datetime
 from enum import StrEnum
 from sqlalchemy.orm import declarative_base
-from services.product_service.domain.entities import ProductCategory
+from domain.entities import ProductCategory
 
 Base = declarative_base()
 

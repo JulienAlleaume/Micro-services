@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from services.product_service.infrastructure.db.schema import EventDB
+from infrastructure.db.schema import EventDB
 from domain.events import ProductCreatedEvent
 
 class EventStore:

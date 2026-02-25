@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
-from services.product_service.domain.entities import ProductCategory
+from domain.entities import ProductCategory
 
 class ProductCreatedEvent(BaseModel):
     """Cet événement est publié quand un produit est créé avec succès."""

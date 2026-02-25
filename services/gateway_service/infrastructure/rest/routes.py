@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse
 import httpx
 
 from application.service.pricing import PricingGatewayService
+from application.service.inventory import InventoryGatewayService
 
 router = APIRouter()
 
@@ -94,6 +95,40 @@ def update_price(price_id: int, request_body: dict):
     try:
         service = PricingGatewayService()
         return service.update_price(price_id, request_body)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ──────────────────────────────────────────────
+#  Routes Inventory (via ZMQ RPC)
+# ──────────────────────────────────────────────
+
+@router.get("/inventory/")
+def get_all_inventory():
+    """Liste tout l'inventaire."""
+    try:
+        service = InventoryGatewayService()
+        return service.get_all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/inventory/{product_id}")
+def get_inventory_by_product(product_id: int):
+    """Recupere l'inventaire pour un produit donne."""
+    try:
+        service = InventoryGatewayService()
+        return service.get_by_product(product_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/inventory/{warehouse_id}/{product_id}")
+def update_inventory(warehouse_id: int, product_id: int, request_body: dict):
+    """Met a jour la quantite en stock pour un entrepot/produit."""
+    try:
+        service = InventoryGatewayService()
+        return service.update_quantity(warehouse_id, product_id, request_body)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

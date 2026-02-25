@@ -59,20 +59,20 @@ def start_rpc_server():
     socket = context.socket(zmq.REP)
     socket.bind(f"tcp://0.0.0.0:{PRICING_REP_PORT}")
 
-    print(f"🚀 Pricing REP socket bound on port {PRICING_REP_PORT}, waiting for requests…")
+    print(f"Pricing REP socket bound on port {PRICING_REP_PORT}, waiting for requests…")
 
     while True:
         try:
             message = socket.recv_string()
             request = json.loads(message)
-            print(f"📥 RPC request: {request.get('action')}")
+            print(f"RPC request: {request.get('action')}")
 
             response = _handle_request(request)
 
             socket.send_string(json.dumps(response))
-            print(f"📤 RPC response sent for action '{request.get('action')}'")
+            print(f"RPC response sent for action '{request.get('action')}'")
         except Exception as e:
             # En cas d'erreur inattendue, on envoie quand même une réponse
             # pour ne pas bloquer le socket REP
-            print(f"❌ REP server error: {e}")
+            print(f"REP server error: {e}")
             socket.send_string(json.dumps({"success": False, "error": str(e)}))

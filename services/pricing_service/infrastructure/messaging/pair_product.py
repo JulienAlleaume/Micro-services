@@ -27,5 +27,5 @@ def fetch_product(product_id: int) -> dict | None:
         with urllib.request.urlopen(req, timeout=5) as resp:
             return json.loads(resp.read().decode())
     except Exception as e:
-        print(f"⚠️ Could not fetch product {product_id}: {e}")
+        print(f"Could not fetch product {product_id}: {e}")
         return None

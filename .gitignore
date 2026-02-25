@@ -16,3 +16,7 @@ ENV/
 
 # Logs
 *.log
+
+# Scripts
+populate_db.py
+test_api.sh

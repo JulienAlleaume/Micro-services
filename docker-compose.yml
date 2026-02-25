@@ -15,7 +15,7 @@ services:
   product_service:
     build: ./services/product_service
     container_name: product_service
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    command: uv run uvicorn main:app --host 0.0.0.0 --port 8001 --reload
     volumes:
       - ./services/product_service:/app
     ports:
@@ -30,7 +30,7 @@ services:
   pricing_service:
     build: ./services/pricing_service
     container_name: pricing_service
-    command: python main.py
+    command: uv run python main.py
     volumes:
       - ./services/pricing_service:/app
     ports:
@@ -44,10 +44,27 @@ services:
       - postgres
       - product_service
 
+  inventory_service:
+    build: ./services/inventory_service
+    container_name: inventory_service
+    command: uv run python main.py
+    volumes:
+      - ./services/inventory_service:/app
+    ports:
+      - "5557:5557"  # ZMQ REP — accessible par le client REQ de la gateway
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
+      - PRODUCT_ZMQ_URL=tcp://product_service:5555
+      - INVENTORY_REP_PORT=5557
+      - PRODUCT_SERVICE_URL=http://product_service:8001
+    depends_on:
+      - postgres
+      - product_service
+
   gateway_service:
     build: ./services/gateway_service
     container_name: gateway_service
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./services/gateway_service:/app
     ports:
@@ -55,9 +72,11 @@ services:
     environment:
       - PRODUCT_SERVICE_URL=http://product_service:8001
       - PRICING_ZMQ_URL=tcp://pricing_service:5556
+      - INVENTORY_ZMQ_URL=tcp://inventory_service:5557
     depends_on:
       - product_service
       - pricing_service
+      - inventory_service
 
 volumes:
   postgres_data:

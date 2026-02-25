@@ -16,7 +16,7 @@ def _handle_event(event: dict):
     """
     Crée automatiquement un prix par défaut pour le nouveau produit.
     """
-    print(f"📬 Event received: product.created for product_id={event.get('product_id')}")
+    print(f"Event received: product.created for product_id={event.get('product_id')}")
     try:
         default_price = Price(
             product_id=event["product_id"],
@@ -28,9 +28,9 @@ def _handle_event(event: dict):
             repo = PriceRepository(uow.session)
             service = PricingService(repo)
             created = service.create_price(default_price)
-            print(f"✅ Default price created: {created.model_dump()}")
+            print(f"Default price created: {created.model_dump()}")
     except Exception as e:
-        print(f"❌ Error creating default price: {e}")
+        print(f"Error creating default price: {e}")
 
 
 def start_subscriber():
@@ -44,7 +44,7 @@ def start_subscriber():
     # (évite le 'slow joiner' problem)
     time.sleep(1)
 
-    print(f"📡 Pricing SUB connected to {PRODUCT_ZMQ_URL}, waiting for events…")
+    print(f"Pricing SUB connected to {PRODUCT_ZMQ_URL}, waiting for events…")
 
     while True:
         try:
@@ -52,4 +52,4 @@ def start_subscriber():
             event = json.loads(message)
             _handle_event(event)
         except Exception as e:
-            print(f"❌ Subscriber error: {e}")
+            print(f"Subscriber error: {e}")
