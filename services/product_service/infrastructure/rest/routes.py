@@ -4,11 +4,26 @@ from sqlalchemy.orm import Session
 
 from infrastructure.db.database import SessionLocal
 from infrastructure.db.repositories import ProductRepository
+from infrastructure.messaging.pub_produit_adapter import ProductEventPublisher
 from application.services.crud_services import ProductService
 from application.dtos import ProductCreateRequest, ProductResponse
-from services.product_service.domain.entities import Product, ProductCategory
+from domain.entities import Product, ProductCategory
 
 router = APIRouter()
+
+# --- Singleton publisher ZMQ (lazy init) ---
+_publisher = None
+
+
+def _get_publisher():
+    global _publisher
+    if _publisher is None:
+        try:
+            _publisher = ProductEventPublisher()
+        except Exception as e:
+            print(f"Could not init ZMQ publisher: {e}")
+    return _publisher
+
 
 # --- Injection de Dépendances ---
 def get_db():
@@ -18,9 +33,10 @@ def get_db():
     finally:
         db.close()
 
+
 def get_product_service(db: Session = Depends(get_db)) -> ProductService:
     repository = ProductRepository(db)
-    return ProductService(repository)
+    return ProductService(repository, event_publisher=_get_publisher())
 
 # --- Routes ---
 

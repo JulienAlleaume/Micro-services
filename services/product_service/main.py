@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from infrastructure.db.models import Base
+from infrastructure.db.schema import Base
 from infrastructure.db.database import engine
 from infrastructure.rest.routes import router as product_router
 

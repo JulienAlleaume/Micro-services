@@ -13,6 +13,11 @@ ENV/
 # Database
 *.db
 *.sqlite3
+.db_populated
 
 # Logs
 *.log
+
+# Scripts
+populate_db.py
+test_api.sh

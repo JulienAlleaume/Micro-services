@@ -1,16 +1,16 @@
 from typing import List
-from services.product_service.domain.entities import Product
+from domain.entities import Product
+from domain.events import ProductCreatedEvent
 from infrastructure.db.repositories import ProductRepository
 
+
 class ProductService:
-    def __init__(self, 
-        repository: ProductRepository,
-    ):
+    def __init__(self, repository: ProductRepository, event_publisher=None):
         self.repository = repository
+        self.event_publisher = event_publisher
 
     def get_product(self, product_id: int) -> Product:
         """Récupère un produit par son ID."""
-        # Le repository se charge de lever une exception si non trouvé
         return self.repository.get_product(product_id)
 
     def get_all_products(self) -> List[Product]:
@@ -18,7 +18,19 @@ class ProductService:
         return self.repository.get_all_products()
 
     def create_product(self, product: Product) -> Product:
-        """Crée un nouveau produit après validation métier."""
-        # C'est ici qu'on ajouterait de la logique métier supplémentaire si besoin
-        # (ex: vérifier si l'utilisateur a le droit de créer, envoyer une notif, etc.)
-        return self.repository.create_product(product)
+        """Crée un nouveau produit et publie l'événement ProductCreated."""
+        created = self.repository.create_product(product)
+
+        # Publie l'événement si un publisher est configuré
+        if self.event_publisher:
+            event = ProductCreatedEvent(
+                product_id=created.id,
+                name=created.name,
+                category=created.category,
+            )
+            try:
+                self.event_publisher.publish_product_created(event)
+            except Exception as e:
+                print(f"Failed to publish event: {e}")
+
+        return created
