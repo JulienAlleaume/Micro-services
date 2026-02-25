@@ -25,5 +25,32 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  product_service:
+    build: ./services/product_service
+    container_name: product_service
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./services/product_service:/app
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-app_db}
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  gateway_service:
+    build: ./services/gateway_service
+    container_name: gateway_service
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./services/gateway_service:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - PRODUCT_SERVICE_URL=http://product_service:8001
+    depends_on:
+      - product_service
+
 volumes:
   postgres_data:

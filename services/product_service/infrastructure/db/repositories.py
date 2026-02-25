@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 # Import du modèle de domaine (Pydantic)
-from domain.models import Product, ProductCategory
+from services.product_service.domain.entities import Product, ProductCategory
 # Import du modèle de base de données (SQLAlchemy) avec un alias pour éviter les conflits
-from infrastructure.db.models import ProductShema as ProductDB
+from services.product_service.infrastructure.db.schema import ProductShema as ProductDB
 
 class ProductRepository:
     def __init__(self, session: Session):
