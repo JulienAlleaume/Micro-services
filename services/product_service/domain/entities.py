@@ -8,6 +8,8 @@ class ProductCategory(StrEnum):
     SUBSCRIPTION = "subscription"
     SERVICE = "service"
     COSMETIC = "cosmetic"
+    WEAPON = "weapon"
+    ARMOR = "armor"
 
 class Product(BaseModel):
     id: int = Field(description="Identifiant unique du produit")

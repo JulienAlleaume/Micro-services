@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 
 from infrastructure.db.database import SessionLocal
 from infrastructure.db.repositories import ProductRepository
-from application.services import ProductService
+from application.services.crud_services import ProductService
 from application.dtos import ProductCreateRequest, ProductResponse
-from domain.models import Product, ProductCategory
+from services.product_service.domain.entities import Product, ProductCategory
 
 router = APIRouter()
 

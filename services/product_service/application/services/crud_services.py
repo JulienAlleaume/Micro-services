@@ -1,5 +1,5 @@
 from typing import List
-from domain.models import Product
+from services.product_service.domain.entities import Product
 from infrastructure.db.repositories import ProductRepository
 
 class ProductService:
