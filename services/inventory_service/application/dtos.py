@@ -2,6 +2,24 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+# ── Warehouse DTOs ────────────────────────────────────────────────
+
+class WarehouseResponse(BaseModel):
+    id: int
+    name: str
+    location: str
+
+    class Config:
+        from_attributes = True
+
+
+class WarehouseCreateRequest(BaseModel):
+    name: str = Field(..., max_length=100, description="Nom de l'entrepot")
+    location: str = Field(default="", max_length=100, description="Zone WoW")
+
+
+# ── Inventory DTOs ────────────────────────────────────────────────
+
 # DTO pour la reponse (GET)
 class InventoryResponse(BaseModel):
     id: int

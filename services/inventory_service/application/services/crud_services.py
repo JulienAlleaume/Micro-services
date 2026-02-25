@@ -1,6 +1,20 @@
 from typing import List
-from domain.entities import Inventory
-from infrastructure.db.repository import InventoryRepository
+from domain.entities import Inventory, Warehouse
+from infrastructure.db.repository import InventoryRepository, WarehouseRepository
+
+
+class WarehouseService:
+    def __init__(self, repository: WarehouseRepository):
+        self.repository = repository
+
+    def get_all(self) -> List[Warehouse]:
+        return self.repository.get_all()
+
+    def get_by_id(self, warehouse_id: int) -> Warehouse:
+        return self.repository.get_by_id(warehouse_id)
+
+    def create(self, warehouse: Warehouse) -> Warehouse:
+        return self.repository.create(warehouse)
 
 
 class InventoryService:

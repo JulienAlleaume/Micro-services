@@ -70,39 +70,65 @@ curl -s -X PATCH "$BASE_URL/inventory/1/1" \
 title "12. Vérification du nouveau stock (GET /inventory/1)"
 curl -s "$BASE_URL/inventory/1" | python3 -m json.tool
 
+# ── WAREHOUSES ───────────────────────────────────────────
+
+title "13. Création d'un entrepôt — Banque de Hurlevent (POST /warehouses/)"
+curl -s -X POST "$BASE_URL/warehouses/" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Banque de Hurlevent","location":"Hurlevent"}' \
+  | python3 -m json.tool && ok "Entrepôt créé"
+
+title "14. Création d'un entrepôt — Banque d'\''Orgrimmar (POST /warehouses/)"
+curl -s -X POST "$BASE_URL/warehouses/" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Banque d'\''Orgrimmar","location":"Orgrimmar"}' \
+  | python3 -m json.tool && ok "Entrepôt créé"
+
+title "15. Création d'un entrepôt — Caveau de Dalaran (POST /warehouses/)"
+curl -s -X POST "$BASE_URL/warehouses/" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Caveau de Dalaran","location":"Dalaran"}' \
+  | python3 -m json.tool && ok "Entrepôt créé"
+
+title "16. Liste de tous les entrepôts (GET /warehouses/)"
+curl -s "$BASE_URL/warehouses/" | python3 -m json.tool && ok "Entrepôts récupérés"
+
+title "17. Entrepôt par ID (GET /warehouses/1)"
+curl -s "$BASE_URL/warehouses/1" | python3 -m json.tool && ok "Entrepôt récupéré"
+
 # ── CUSTOMERS ────────────────────────────────────────────
 
-title "13. Création d'un client (POST /customers/)"
+title "18. Création d'un client (POST /customers/)"
 curl -s -X POST "$BASE_URL/customers/" \
   -H 'Content-Type: application/json' \
   -d '{"username":"arthas","email":"arthas@northrend.wow","gold_balance":10000}' \
   | python3 -m json.tool && ok "Client créé"
 
-title "14. Liste de tous les clients (GET /customers/)"
+title "19. Liste de tous les clients (GET /customers/)"
 curl -s "$BASE_URL/customers/" | python3 -m json.tool && ok "Clients récupérés"
 
-title "15. Client par ID (GET /customers/1)"
+title "20. Client par ID (GET /customers/1)"
 curl -s "$BASE_URL/customers/1" | python3 -m json.tool && ok "Client récupéré"
 
 # ── ORDERS ───────────────────────────────────────────────
 
-title "16. Création d'une commande (POST /orders/)"
+title "21. Création d'une commande (POST /orders/)"
 curl -s -X POST "$BASE_URL/orders/" \
   -H 'Content-Type: application/json' \
   -d '{"customer_id":1,"lines":[{"product_id":1,"product_name":"Rênes Invincible","quantity":1,"unit_price":999}]}' \
   | python3 -m json.tool && ok "Commande créée"
 
-title "17. Liste de toutes les commandes (GET /orders/)"
+title "22. Liste de toutes les commandes (GET /orders/)"
 curl -s "$BASE_URL/orders/" | python3 -m json.tool && ok "Commandes récupérées"
 
-title "18. Commande par ID (GET /orders/1)"
+title "23. Commande par ID (GET /orders/1)"
 curl -s "$BASE_URL/orders/1" | python3 -m json.tool && ok "Commande récupérée"
 
-title "19. Mise à jour du statut (PATCH /orders/1)"
+title "24. Mise à jour du statut (PATCH /orders/1)"
 curl -s -X PATCH "$BASE_URL/orders/1" \
   -H 'Content-Type: application/json' \
   -d '{"status":"confirmed"}' \
   | python3 -m json.tool && ok "Statut mis à jour"
 
 sep
-echo -e "\n${GREEN}Tests terminés.${RESET}\n"
+echo -e "\n${GREEN}Tests terminés (24 tests).${RESET}\n"

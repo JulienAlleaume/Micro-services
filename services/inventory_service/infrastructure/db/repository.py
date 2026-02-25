@@ -2,8 +2,34 @@ from typing import List, Optional
 from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 
-from domain.entities import Inventory
-from infrastructure.db.schema import InventorySchema as InventoryDB
+from domain.entities import Inventory, Warehouse
+from infrastructure.db.schema import InventorySchema as InventoryDB, WarehouseSchema as WarehouseDB
+
+
+class WarehouseRepository:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def get_all(self) -> List[Warehouse]:
+        results = self.session.execute(select(WarehouseDB)).scalars().all()
+        return [self._to_domain(r) for r in results]
+
+    def get_by_id(self, warehouse_id: int) -> Warehouse:
+        result = self.session.get(WarehouseDB, warehouse_id)
+        if not result:
+            raise Exception(f"Warehouse with id {warehouse_id} not found")
+        return self._to_domain(result)
+
+    def create(self, warehouse: Warehouse) -> Warehouse:
+        db_row = WarehouseDB(name=warehouse.name, location=warehouse.location)
+        self.session.add(db_row)
+        self.session.commit()
+        self.session.refresh(db_row)
+        return self._to_domain(db_row)
+
+    @staticmethod
+    def _to_domain(db: WarehouseDB) -> Warehouse:
+        return Warehouse(id=db.id, name=db.name, location=db.location)
 
 
 class InventoryRepository:

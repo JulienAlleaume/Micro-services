@@ -6,6 +6,14 @@ class Base(DeclarativeBase):
     pass
 
 
+class WarehouseSchema(Base):
+    __tablename__ = "warehouses"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(100))
+    location: Mapped[str] = mapped_column(String(100), default="")
+
+
 class InventorySchema(Base):
     __tablename__ = "inventory"
     __table_args__ = (
